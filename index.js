@@ -11,6 +11,9 @@ require("dotenv").config();
 
 const port = process.env.PORT || 3000;
 
+// var result = undefined;
+var result = undefined;
+
 app.post('/webhook', function (req, res) {
 	// console.log('Received a post request');
 	if (!req.body) {
@@ -20,8 +23,9 @@ app.post('/webhook', function (req, res) {
 	// console.log('Received post request from DialogFlow');
 	// console.log(req.body);
   var cityName = req.body.queryResult.parameters['city'];
-  console.log("City is : ",cityName);
+  // console.log("City is : ",cityName);
   var w = getWeather(cityName);
+  // console.log("w:", w)
 	let response = ""; //Default response from the webhook 
 	let responseObj = {
 		"fulfillmentText": response,
@@ -33,15 +37,14 @@ app.post('/webhook', function (req, res) {
 		"source": ""
 	}
 	// console.log('Response to dialogflow');
-	// console.log(responseObj);
 	return res.json(responseObj);
 })
 
-var result = undefined;
+
 
 function parseResponse(err, response, body) {
 	if (err) {
-		console.log('error:', error);
+		console.log('error:', err);
 	}
     // var obj = JSON.parse(body);
     // var list = obj.list[0]; //date
@@ -65,7 +68,7 @@ function parseResponse(err, response, body) {
     //   console.log("description", description)
     //   res.write(JSON.stringify({"fulfillmentText": description}))
 
-	var obj = JSON.parse(body);
+	  var obj = JSON.parse(body);
     var list = obj.list[0]; //date
     var len = obj.list.length;
     console.log("Total length:", len );
@@ -73,6 +76,8 @@ function parseResponse(err, response, body) {
 	if (obj.message === 'city not found') {
 		result = 'Unable to get weather ' + obj.message;
 	} else {
+    var city = obj.city.name;
+    console.log("City in post req:",city);
     for(var i=0; i<len; i=i+8){
       var currDate = ' ';
       var time = obj.list[i].dt_txt;
@@ -87,35 +92,39 @@ function parseResponse(err, response, body) {
       }
       var temperature = obj.list[i].main.temp;
       var tempC = temperature - 273.15;
+      // console.log("temp:",tempC);
       var weather = obj.list[i].weather[0].description;
       description = weather;
       description = tempC.toFixed(2) + " degrees, " + description + " on  " + currentDate.toString();
-      var city = obj.city.name;
+      
       if(i==0){
-        var des0 = "Weather in "+ city + " for today and next 4 days is as follows: " + "\n" + description + ".\n";
+        des0 = "Weather in "+ city + " for today and next 4 days is as follows: " + "\n" + description + ".\n";
       }
       else if(i==8){
-        var des1 = description + ".\n";
+        des1 = description + ".\n";
       }
       else if(i==16){
-        var des2 = description + ".\n";
+        des2 = description + ".\n";
       }
       else if(i==24){
-        var des3 = description + ".\n";
+        des3 = description + ".\n";
       }
       else if(i==32){
-        var des4 = description + ".\n";
+        des4 = description + ".\n";
       }
       // result = des0 + des1 + des2 + des3 + des4;
       // console.log("Result", result)
     }
     result = des0 + des1 + des2 + des3 + des4;
     console.log("Result", result)
+    // return result;
 	}
+  return result;
 }
 
 function getWeather(city) {
   // console.log(process.env.WEATHER_API_KEY)
+  // console.log("City in getcity", city);
   var url = "https://api.openweathermap.org/data/2.5/forecast?q=" + city + "&appid=" + process.env.WEATHER_API_KEY;
   // console.log(url);
   //parse response from url
@@ -124,8 +133,10 @@ function getWeather(city) {
     //block this code
 		require('deasync').runLoopOnce();
 	}
+  // console.log("Result in getWeather:",result)
 	return result;
 }
+
 
 app.get('/', function (req, res) {
 	res.sendFile(path.join(__dirname, '/index.html'));
