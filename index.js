@@ -11,7 +11,6 @@ require("dotenv").config();
 
 const port = process.env.PORT || 3000;
 
-// var result = undefined;
 var result = undefined;
 
 app.post('/webhook', function (req, res) {
@@ -50,7 +49,7 @@ function parseResponse(err, response, body) {
     // var list = obj.list[0]; //date
     // console.log("Total length:", obj.list.length);
 
-  // for current day
+    // for current day
 
     // var date = new Date(obj.list[0].dt * 1000);
     // var weather = obj.list[0].weather[0].description;
@@ -73,12 +72,13 @@ function parseResponse(err, response, body) {
     var len = obj.list.length;
     console.log("Total length:", len );
 
-	if (obj.message === 'city not found') {
-		result = 'Unable to get weather ' + obj.message;
-	} else {
-    var city = obj.city.name;
-    console.log("City in post req:",city);
-    for(var i=0; i<len; i=i+8){
+    if (obj.message === 'city not found') {
+      result = 'Unable to get weather ' + obj.message;
+    } 
+    else {
+      var city = obj.city.name;
+      console.log("City in post req:",city);
+      for(var i=0; i<len; i=i+8){
       var currDate = ' ';
       var time = obj.list[i].dt_txt;
       // console.log("Time:", time);
